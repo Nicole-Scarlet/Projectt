@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter For You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: floatHeart 6s infinite;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .prompt-text {
+            font-size: 36px;
+            color: white;
+            margin-bottom: 60px;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.7);
+            animation: fadeIn 1s ease-in;
+            transition: opacity 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            perspective: 2000px;
+        }
+
+        .envelope-container {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            transition: all 0.8s ease;
+        }
+
+        .envelope-wrapper.opened .envelope-container {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Envelope back */
+        .envelope-back {
+            position: relative;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 100%);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .envelope-back::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid rgba(139, 115, 85, 0.2);
+        }
+
+        /* Envelope front flaps (left and right triangles) */
+        .envelope-back::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(to bottom right, transparent 0%, transparent 49.5%, #d4c4b7 49.5%, #d4c4b7 50%, transparent 50%, transparent 100%),
+                linear-gradient(to bottom left, transparent 0%, transparent 49.5%, #d4c4b7 49.5%, #d4c4b7 50%, transparent 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Envelope top flap */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: top center;
+            transition: all 1s ease;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .envelope-flap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 400px solid transparent;
+            border-right: 400px solid transparent;
+            border-top: 190px solid #d4c4b7;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        .envelope-flap::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 400px solid transparent;
+            border-right: 400px solid transparent;
+            border-top: 190px solid #c4b4a7;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Heart seal */
+        .heart-seal {
+            position: absolute;
+            top: 135px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            color: #ff6b9d;
+            filter: drop-shadow(0 4px 12px rgba(255, 107, 157, 0.6));
+            z-index: 4;
+            transition: all 1s ease;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+        }
+
+        .envelope-wrapper:hover .envelope-back {
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .envelope-wrapper:hover .heart-seal {
+            animation: none;
+            transform: translateX(-50%) scale(1.15);
+        }
+
+        .envelope-wrapper.opened .envelope-flap::before {
+            transform: rotateX(-180deg);
+            opacity: 0;
+        }
+
+        .envelope-wrapper.opened .envelope-flap::after {
+            transform: rotateX(-180deg);
+            opacity: 1;
+        }
+
+        .envelope-wrapper.opened .heart-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(0) rotate(180deg);
+        }
+
+        /* Letter */
+.letter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 90%;
+            max-width: 700px;
+            height: 700px;
+            max-height: 700px;
+            background: linear-gradient(to bottom, #fffef9 0%, #fdf8f0 100%);
+            border-radius: 8px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+            padding: 50px 50px 80px 50px;
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 5;
+            overflow-y: auto;
+        }
+
+        .letter::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 1px solid rgba(139, 115, 85, 0.15);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .letter::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .letter::-webkit-scrollbar-track {
+            background: rgba(196, 180, 167, 0.2);
+            border-radius: 4px;
+        }
+
+        .letter::-webkit-scrollbar-thumb {
+            background: #c4b4a7;
+            border-radius: 4px;
+        }
+
+        .letter::-webkit-scrollbar-thumb:hover {
+            background: #b4a497;
+        }
+
+        .envelope-wrapper.opened .letter {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .letter-content {
+            color: #2a2a2a;
+            font-size: 18px;
+            line-height: 2;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+        }
+
+        .letter-content .greeting {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #4a4a4a;
+            font-weight: bold;
+        }
+
+        .letter-content .signature {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            text-align: right;
+            font-style: italic;
+            color: #5a4a5a;
+            font-size: 20px;
+            z-index: 10;
+            background: linear-gradient(to bottom, transparent 0%, #fdf8f0 20%);
+            padding: 10px 15px 5px 40px;
+        }
+
+        .letter-content p {
+            margin-bottom: 20px;
+            text-indent: 30px;
+        }
+
+        .navigation-arrows {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .envelope-wrapper.opened .navigation-arrows {
+            opacity: 1;
+        }
+
+        .nav-arrow {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f5e6d3, #e8d5c4);
+            border: 2px solid rgba(139, 115, 85, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 28px;
+            color: #5a4a5a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        .nav-arrow:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #e8d5c4, #d4c4b7);
+        }
+
+        .nav-arrow:active {
+            transform: scale(0.95);
+        }
+
+        .nav-arrow.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .sparkle.animate {
+            animation: sparkleAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes sparkleAnim {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .envelope-container {
+                width: 320px;
+                height: 200px;
+            }
+
+            .envelope-back {
+                width: 320px;
+                height: 200px;
+            }
+
+            .envelope-flap::before {
+                border-left: 160px solid transparent;
+                border-right: 160px solid transparent;
+                border-top: 110px solid #d4c4b7;
+            }
+
+            .envelope-flap::after {
+                border-left: 160px solid transparent;
+                border-right: 160px solid transparent;
+                border-top: 110px solid #c4b4a7;
+            }
+
+            .heart-seal {
+                top: 90px;
+                font-size: 40px;
+            }
+
+            /* LETTER TAKES ALMOST FULL SCREEN ON MOBILE */
+            .letter {
+                width: 76vw;
+                max-width: none;
+                height: 55vh;
+                max-height: none;
+                padding: 25px 20px 20px 20px;
+                border-radius: 6px;
+            }
+
+            .letter::before {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+            }
+
+            .letter-content {
+                font-size: 15px;
+                line-height: 1.8;
+            }
+
+            .letter-content .greeting {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            .letter-content .signature {
+                font-size: 17px;
+                bottom: 70px;
+                right: 15px;
+                padding: 8px 10px 5px 30px;
+            }
+
+            .letter-content p {
+                margin-bottom: 15px;
+                text-indent: 20px;
+            }
+
+            .prompt-text {
+                font-size: 22px;
+                margin-bottom: 40px;
+            }
+
+            .nav-arrow {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .navigation-arrows {
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+
+        /* For very small screens */
+        @media (max-width: 480px) {
+            .letter {
+                width: 78vw;
+                height: 56vh;
+                padding: 20px 15px 15px 15px;
+            }
+
+            .letter-content {
+                font-size: 14px;
+                line-height: 1.7;
+            }
+
+            .letter-content .greeting {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            .letter-content .signature {
+                font-size: 16px;
+                bottom: 65px;
+                right: 12px;
+                padding: 6px 8px 4px 25px;
+            }
+
+            .letter-content p {
+                text-indent: 15px;
+            }
+
+            .prompt-text {
+                font-size: 20px;
+            }
+
+            .navigation-arrows {
+                bottom: 12px;
+                right: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Floating hearts -->
+    <div class="floating-hearts" id="floatingHearts"></div>
+
+    <div class="container">
+        <div class="prompt-text" id="promptText">
+            Click the envelope to read your letter 💌
+        </div>
+
+        <div class="envelope-wrapper" id="envelopeWrapper">
+            <div class="envelope-container">
+                <div class="envelope-back"></div>
+                <div class="envelope-flap"></div>
+                <div class="heart-seal">💖</div>
+            </div>
+            
+            <div class="letter">
+                <div class="letter-content">
+                    <div class="greeting">Hi Zakii🥰,</div>
+                    
+                    <p>Happy Birthday poooo! 🎉</p>
+                    
+                    <p>I hope you liked my surprise po hehe.... <br>
+
+                    <p>I also hope na you enjoyed your day and always remember na I lovee youuu very very muchhh 
+                        and I'm always here for you no matter what happens🫶🏻.. </p>
+
+
+
+                    <p>And lastly, thank youu din po for always being there for me and I'm so grateful na you've become part of my life...</p>
+
+                    <p>Ayun lang poo hehe HAPPY BIRTHDAY PO ULIII🥳🥳🥳 and I LOVEE YOUUU😘😘😘🫶🏻🫶🏻🫶🏻 </p>
+                    
+                
+
+                    <div class="navigation-arrows">
+                        <a href="one.html" class="nav-arrow">→</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Create floating hearts
+        const heartsContainer = document.getElementById('floatingHearts');
+        for (let i = 0; i < 15; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '♥';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDelay = Math.random() * 6 + 's';
+            heart.style.fontSize = (Math.random() * 15 + 15) + 'px';
+            heart.style.color = `rgba(255, 107, 157, ${Math.random() * 0.5 + 0.3})`;
+            heartsContainer.appendChild(heart);
+        }
+
+        // Envelope interaction
+        const envelopeWrapper = document.getElementById('envelopeWrapper');
+        const promptText = document.getElementById('promptText');
+        const container = document.querySelector('.container');
+
+        let isOpened = false;
+
+        envelopeWrapper.addEventListener('click', function(e) {
+            // Prevent opening if clicking on navigation arrows
+            if (e.target.classList.contains('nav-arrow')) {
+                return;
+            }
+            
+            if (!isOpened) {
+                isOpened = true;
+                
+                // Open the envelope
+                envelopeWrapper.classList.add('opened');
+                
+                // Hide prompt text
+                promptText.style.opacity = '0';
+                setTimeout(() => {
+                    promptText.style.display = 'none';
+                }, 500);
+                
+                // Create sparkles
+                setTimeout(() => {
+                    createSparkles();
+                }, 400);
+            }
+        });
+
+        // Create sparkles animation
+        function createSparkles() {
+            const containerRect = container.getBoundingClientRect();
+            const envelopeRect = envelopeWrapper.getBoundingClientRect();
+            
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                sparkle.style.left = (envelopeRect.left - containerRect.left + envelopeRect.width / 2) + 'px';
+                sparkle.style.top = (envelopeRect.top - containerRect.top + 160) + 'px';
+                
+                const angle = (Math.PI * 2 * i) / 30;
+                const distance = 100 + Math.random() * 80;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                sparkle.style.setProperty('--tx', tx + 'px');
+                sparkle.style.setProperty('--ty', ty + 'px');
+                
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => sparkle.classList.add('animate'), 10);
+                setTimeout(() => sparkle.remove(), 1500);
+            }
+        }
+    </script>
+</body>
+</html>
